@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haushalts-Kanban Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .board {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .column {
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-width: 300px;
+            max-width: 350px;
+            flex: 1;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+        }
+
+        .column:nth-child(1) .column-header { border-color: #e74c3c; }
+        .column:nth-child(2) .column-header { border-color: #f39c12; }
+        .column:nth-child(3) .column-header { border-color: #27ae60; }
+
+        .column-header h2 {
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        .task-count {
+            background: #333;
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .task-list {
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: grab;
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        .task:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .task.dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+
+        .task-category {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .category-haushalt { background: #e8f5e9; color: #2e7d32; border-left-color: #2e7d32; }
+        .category-einkauf { background: #e3f2fd; color: #1565c0; border-left-color: #1565c0; }
+        .category-pflege { background: #fce4ec; color: #c2185b; border-left-color: #c2185b; }
+        .category-garten { background: #fff3e0; color: #e65100; border-left-color: #e65100; }
+
+        .task h3 {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .task p {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .task-meta span {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .add-task-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .add-task-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .drag-over {
+            background: #e8f4fd;
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                flex-direction: column;
+                align-items: center;
+            }
+            .column {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 Haushalts-Kanban Board</h1>
+    
+    <div class="board">
+        <!-- To Do Column -->
+        <div class="column" id="todo">
+            <div class="column-header">
+                <h2>📋 To Do</h2>
+                <span class="task-count" id="todo-count">0</span>
+            </div>
+            <div class="task-list" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'todo')" ondragleave="handleDragLeave(event)">
+            </div>
+            <button class="add-task-btn" onclick="addTask('todo')">+ Aufgabe hinzufügen</button>
+        </div>
+
+        <!-- In Progress Column -->
+        <div class="column" id="inprogress">
+            <div class="column-header">
+                <h2>⚡ In Progress</h2>
+                <span class="task-count" id="inprogress-count">0</span>
+            </div>
+            <div class="task-list" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'inprogress')" ondragleave="handleDragLeave(event)">
+            </div>
+            <button class="add-task-btn" onclick="addTask('inprogress')">+ Aufgabe hinzufügen</button>
+        </div>
+
+        <!-- Done Column -->
+        <div class="column" id="done">
+            <div class="column-header">
+                <h2>✅ Done</h2>
+                <span class="task-count" id="done-count">0</span>
+            </div>
+            <div class="task-list" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'done')" ondragleave="handleDragLeave(event)">
+            </div>
+            <button class="add-task-btn" onclick="addTask('done')">+ Aufgabe hinzufügen</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        Demo-Kanban Board • Erstellt für GitHub Pages Hosting
+    </div>
+
+    <script>
+        // Sample data
+        const tasksData = {
+            todo: [
+                { id: 1, category: 'haushalt', title: 'Wohnzimmer staubsaugen', description: 'Alle Böden + unter Möbel', assignee: 'Max', priority: 'high' },
+                { id: 2, category: 'einkauf', title: 'Lebensmittel einkaufen', description: 'Milch, Brot, Gemüse, Obst', assignee: 'Anna', priority: 'medium' },
+                { id: 3, category: 'pflege', title: 'Wäsche waschen', description: 'Weiße + Buntwäsche trennen', assignee: 'Max', priority: 'high' },
+                { id: 4, category: 'garten', title: 'Rasen mähen', description: 'Hecken auch trimmen', assignee: 'Tom', priority: 'low' }
+            ],
+            inprogress: [
+                { id: 5, category: 'haushalt', title: 'Küche putzen', description: 'Oberflächen + Herd reinigen', assignee: 'Anna', priority: 'medium' },
+                { id: 6, category: 'einkauf', title: 'Bad-Armaturen bestellen', description: 'Online Shop + Lieferung', assignee: 'Max', priority: 'low' }
+            ],
+            done: [
+                { id: 7, category: 'haushalt', title: 'Müll rausbringen', description: 'Restmüll + Recycling', assignee: 'Tom', priority: 'high' },
+                { id: 8, category: 'pflege', title: 'Geschirr spülen', description: 'Im Geschirrspüler einräumen', assignee: 'Anna', priority: 'medium' }
+            ]
+        };
+
+        let draggedItem = null;
+
+        function renderTasks() {
+            ['todo', 'inprogress', 'done'].forEach(columnId => {
+                const list = document.querySelector(`#${columnId} .task-list`);
+                const countEl = document.getElementById(`${columnId}-count`);
+                list.innerHTML = '';
+                
+                tasksData[columnId].forEach(task => {
+                    const taskEl = createTaskElement(task);
+                    list.appendChild(taskEl);
+                });
+                
+                countEl.textContent = tasksData[columnId].length;
+            });
+        }
+
+        function createTaskElement(task) {
+            const div = document.createElement('div');
+            div.className = `task category-${task.category}`;
+            div.draggable = true;
+            div.dataset.id = task.id;
+            div.dataset.category = task.category;
+            
+            const priorityIcon = task.priority === 'high' ? '🔴' : task.priority === 'medium' ? '🟡' : '🟢';
+            
+            div.innerHTML = `
+                <span class="task-category">${getCategoryLabel(task.category)}</span>
+                <h3>${task.title}</h3>
+                <p>${task.description}</p>
+                <div class="task-meta">
+                    <span>👤 ${task.assignee}</span>
+                    <span>${priorityIcon} ${task.priority}</span>
+                </div>
+            `;
+            
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragend', handleDragEnd);
+            div.addEventListener('click', () => editTask(task.id));
+            
+            return div;
+        }
+
+        function getCategoryLabel(cat) {
+            const labels = {
+                'haushalt': '🧹 Haushalt',
+                'einkauf': '🛒 Einkauf',
+                'pflege': '👕 Pflege',
+                'garten': '🌿 Garten'
+            };
+            return labels[cat] || cat;
+        }
+
+        function handleDragStart(e) {
+            draggedItem = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.task-list').forEach(list => {
+                list.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, targetColumn) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (!draggedItem) return;
+            
+            const taskId = parseInt(draggedItem.dataset.id);
+            let task = null;
+            
+            // Find and remove task from current column
+            ['todo', 'inprogress', 'done'].forEach(col => {
+                const idx = tasksData[col].findIndex(t => t.id === taskId);
+                if (idx !== -1) {
+                    task = tasksData[col].splice(idx, 1)[0];
+                }
+            });
+            
+            if (task) {
+                tasksData[targetColumn].push(task);
+                renderTasks();
+                saveToStorage();
+            }
+        }
+
+        function addTask(columnId) {
+            const categories = ['haushalt', 'einkauf', 'pflege', 'garten'];
+            const titles = {
+                'haushalt': ['Badezimmer reinigen', 'Fenster putzen', 'Böden wischen', 'Staub wischen'],
+                'einkauf': ['Getränke kaufen', 'Haushaltswaren', ' Drogerieartikel', 'Snacks & Süßigkeiten'],
+                'pflege': ['Hemden bügeln', 'Bettwäsche wechseln', 'Schuhe putzen', 'Kleidung sortieren'],
+                'garten': ['Blumen gießen', 'Unkraut jäten', 'Terrasse fegen', 'Gartenmöbel reinigen']
+            };
+            
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            const titleOptions = titles[category];
+            const title = titleOptions[Math.floor(Math.random() * titleOptions.length)];
+            
+            const newTask = {
+                id: Date.now(),
+                category: category,
+                title: title,
+                description: 'Klicken zum Bearbeiten',
+                assignee: ['Max', 'Anna', 'Tom'][Math.floor(Math.random() * 3)],
+                priority: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)]
+            };
+            
+            tasksData[columnId].push(newTask);
+            renderTasks();
+            saveToStorage();
+        }
+
+        function editTask(taskId) {
+            const task = ['todo', 'inprogress', 'done']
+                .flatMap(col => tasksData[col].map(t => ({...t, column: col})))
+                .find(t => t.id === taskId);
+            
+            if (!task) return;
+            
+            const newTitle = prompt('Neuer Titel:', task.title);
+            if (newTitle && newTitle.trim()) {
+                task.title = newTitle.trim();
+                renderTasks();
+                saveToStorage();
+            }
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('kanban-tasks', JSON.stringify(tasksData));
+            } catch (e) {
+                console.log('LocalStorage nicht verfügbar');
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('kanban-tasks');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.todo && parsed.inprogress && parsed.done) {
+                        tasksData.todo = parsed.todo;
+                        tasksData.inprogress = parsed.inprogress;
+                        tasksData.done = parsed.done;
+                    }
+                }
+            } catch (e) {
+                console.log('LocalStorage nicht verfügbar oder leer');
+            }
+        }
+
+        // Initialize
+        loadFromStorage();
+        renderTasks();
+    </script>
+</body>
+</html>
