@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haushalts-Kanban Board v2</title>
+    <title>Tobi's - Kanban Board</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -132,12 +132,12 @@
         // So fügst du jemanden hinzu: ASSIGNEES.push('Neuer Name');
         // So entfernst du jemanden: ASSIGNEES.splice(ASSIGNEES.indexOf('Name'), 1);
         const ASSIGNEES = [
-            'Max',
-            'Anna',
-            'Tom',
-            'Lisa',
-            'Familie',
-            'Gemeinsam'
+            'Tobi',
+            'Noah',
+            'Nadja',
+            'Mama',
+            'WG',
+            'Hannelore'
         ];
 
         // Garantiert darstellbare Icons (universelle Unicode-Emojis):
@@ -238,7 +238,7 @@
         }
 
         function getCategoryLabel(cat) {
-            const labels = { haushalt: 'Haushalt', einkauf: 'Einkauf', pflege: 'Pflege', garten: 'Garten' };
+            const labels = { haushalt: 'Haushalt', einkauf: 'Einkauf', pflege: 'Pflege', garten: 'Fahrrad' };
             return labels[cat] || cat;
         }
 
@@ -275,7 +275,7 @@
         }
 
         function addTask(colId) {
-            const cats = ['haushalt', 'einkauf', 'pflege', 'garten'];
+            const cats = ['haushalt', 'einkauf', 'pflege', 'fahrrad'];
             const titles = {
                 haushalt: ['Badezimmer reinigen', 'Fenster putzen', 'Böden wischen', 'Staub wischen'],
                 einkauf: ['Getränke kaufen', 'Haushaltswaren', 'Drogerieartikel', 'Obst & Gemüse'],
