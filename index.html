@@ -86,6 +86,7 @@
             cursor: grab;
             transition: all 0.3s ease;
             border-left: 4px solid;
+            position: relative;
         }
 
         .task:hover {
@@ -98,20 +99,31 @@
             transform: rotate(3deg);
         }
 
+        .task-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .task-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
         .task-category {
             display: inline-block;
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             text-transform: uppercase;
         }
-
-        .category-haushalt { background: #e8f5e9; color: #2e7d32; border-left-color: #2e7d32; }
-        .category-einkauf { background: #e3f2fd; color: #1565c0; border-left-color: #1565c0; }
-        .category-pflege { background: #fce4ec; color: #c2185b; border-left-color: #c2185b; }
-        .category-garten { background: #fff3e0; color: #e65100; border-left-color: #e65100; }
 
         .task h3 {
             color: #333;
@@ -130,12 +142,45 @@
             margin-top: 10px;
             font-size: 0.75rem;
             color: #999;
+            flex-wrap: wrap;
         }
 
         .task-meta span {
             display: flex;
             align-items: center;
             gap: 3px;
+        }
+
+        .task-actions {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            gap: 5px;
+        }
+
+        .task:hover .task-actions {
+            display: flex;
+        }
+
+        .task-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .task-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .task-btn.delete:hover {
+            background: #ffe5e5;
+            color: #c0392b;
+            border-color: #c0392b;
         }
 
         .add-task-btn {
@@ -158,6 +203,145 @@
 
         .drag-over {
             background: #e8f4fd;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Icon Picker */
+        .icon-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .icon-picker label {
+            padding: 8px 12px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.2s;
+        }
+
+        .icon-picker label:hover {
+            background: #f0f0f0;
+        }
+
+        .icon-picker input[type="radio"] {
+            display: none;
+        }
+
+        .icon-picker input[type="radio"]:checked + label {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .modal-actions button:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: #fff;
         }
 
         @media (max-width: 768px) {
@@ -221,22 +405,128 @@
         Demo-Kanban Board • Erstellt für GitHub Pages Hosting
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <h2>✏️ Aufgabe bearbeiten</h2>
+            <form id="editForm">
+                <input type="hidden" id="editTaskId">
+                <input type="hidden" id="editColumn">
+                
+                <div class="form-group">
+                    <label for="editTitle">Titel</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDescription">Beschreibung</label>
+                    <textarea id="editDescription"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAssignee">Zugewiesen an</label>
+                    <select id="editAssignee">
+                        <option value="">Niemand</option>
+                        <option value="Max">Max</option>
+                        <option value="Anna">Anna</option>
+                        <option value="Tom">Tom</option>
+                        <option value="Lisa">Lisa</option>
+                        <option value="Familie">Familie</option>
+                        <option value="Gemeinsam">Gemeinsam</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCategory">Kategorie</label>
+                    <select id="editCategory">
+                        <option value="haushalt">🧹 Haushalt</option>
+                        <option value="einkauf">🛒 Einkauf</option>
+                        <option value="pflege">👕 Pflege</option>
+                        <option value="garten">🌿 Garten</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Icon auswählen</label>
+                    <div class="icon-picker" id="iconPicker">
+                        <input type="radio" name="taskIcon" id="icon-vacuum" value="🧹">
+                        <label for="icon-vacuum">🧹</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-shopping" value="🛒">
+                        <label for="icon-shopping">🛒</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-laundry" value="👕">
+                        <label for="icon-laundry">👕</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-plant" value="🌿">
+                        <label for="icon-plant">🌿</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-kitchen" value="🍳">
+                        <label for="icon-kitchen">🍳</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-bath" value="🚿">
+                        <label for="icon-bath">🚿</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-bed" value="🛏️">
+                        <label for="icon-bed">🛏️</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-window" value="🪟">
+                        <label for="icon-window">🪟</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-recycle" value="♻️">
+                        <label for="icon-recycle">♻️</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-grocery" value="🛍️">
+                        <label for="icon-grocery">🛍️</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-broom" value="🧹">
+                        <label for="icon-broom">🧹</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-sponge" value="🧽">
+                        <label for="icon-sponge">🧽</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-soap" value="🧴">
+                        <label for="icon-soap">🧴</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-iron" value="🔥">
+                        <label for="icon-iron">🔥</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-mop" value="💧">
+                        <label for="icon-mop">💧</label>
+                        
+                        <input type="radio" name="taskIcon" id="icon-potted" value="🪴">
+                        <label for="icon-potted">🪴</label>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-delete" onclick="deleteCurrentTask()">🗑️ Löschen</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Abbrechen</button>
+                    <button type="submit" class="btn-save">💾 Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Available icons
+        const ICONS = ['🧹', '🛒', '👕', '🌿', '🍳', '🚿', '🛏️', '🪟', '♻️', '🛍️', '🧽', '🧴', '🔥', '💧', '🪴'];
+
         // Sample data
         const tasksData = {
             todo: [
-                { id: 1, category: 'haushalt', title: 'Wohnzimmer staubsaugen', description: 'Alle Böden + unter Möbel', assignee: 'Max', priority: 'high' },
-                { id: 2, category: 'einkauf', title: 'Lebensmittel einkaufen', description: 'Milch, Brot, Gemüse, Obst', assignee: 'Anna', priority: 'medium' },
-                { id: 3, category: 'pflege', title: 'Wäsche waschen', description: 'Weiße + Buntwäsche trennen', assignee: 'Max', priority: 'high' },
-                { id: 4, category: 'garten', title: 'Rasen mähen', description: 'Hecken auch trimmen', assignee: 'Tom', priority: 'low' }
+                { id: 1, category: 'haushalt', title: 'Wohnzimmer staubsaugen', description: 'Alle Böden + unter Möbel', assignee: 'Max', icon: '🧹' },
+                { id: 2, category: 'einkauf', title: 'Lebensmittel einkaufen', description: 'Milch, Brot, Gemüse, Obst', assignee: 'Anna', icon: '🛒' },
+                { id: 3, category: 'pflege', title: 'Wäsche waschen', description: 'Weiße + Buntwäsche trennen', assignee: 'Max', icon: '👕' },
+                { id: 4, category: 'garten', title: 'Rasen mähen', description: 'Hecken auch trimmen', assignee: 'Tom', icon: '🌿' }
             ],
             inprogress: [
-                { id: 5, category: 'haushalt', title: 'Küche putzen', description: 'Oberflächen + Herd reinigen', assignee: 'Anna', priority: 'medium' },
-                { id: 6, category: 'einkauf', title: 'Bad-Armaturen bestellen', description: 'Online Shop + Lieferung', assignee: 'Max', priority: 'low' }
+                { id: 5, category: 'haushalt', title: 'Küche putzen', description: 'Oberflächen + Herd reinigen', assignee: 'Anna', icon: '🍳' },
+                { id: 6, category: 'einkauf', title: 'Bad-Armaturen bestellen', description: 'Online Shop + Lieferung', assignee: 'Max', icon: '🛍️' }
             ],
             done: [
-                { id: 7, category: 'haushalt', title: 'Müll rausbringen', description: 'Restmüll + Recycling', assignee: 'Tom', priority: 'high' },
-                { id: 8, category: 'pflege', title: 'Geschirr spülen', description: 'Im Geschirrspüler einräumen', assignee: 'Anna', priority: 'medium' }
+                { id: 7, category: 'haushalt', title: 'Müll rausbringen', description: 'Restmüll + Recycling', assignee: 'Tom', icon: '♻️' },
+                { id: 8, category: 'pflege', title: 'Geschirr spülen', description: 'Im Geschirrspüler einräumen', assignee: 'Anna', icon: '🧽' }
             ]
         };
 
@@ -249,7 +539,7 @@
                 list.innerHTML = '';
                 
                 tasksData[columnId].forEach(task => {
-                    const taskEl = createTaskElement(task);
+                    const taskEl = createTaskElement(task, columnId);
                     list.appendChild(taskEl);
                 });
                 
@@ -257,28 +547,37 @@
             });
         }
 
-        function createTaskElement(task) {
+        function createTaskElement(task, columnId) {
             const div = document.createElement('div');
             div.className = `task category-${task.category}`;
             div.draggable = true;
             div.dataset.id = task.id;
-            div.dataset.category = task.category;
+            div.dataset.column = columnId;
             
-            const priorityIcon = task.priority === 'high' ? '🔴' : task.priority === 'medium' ? '🟡' : '🟢';
+            const icon = task.icon || '📋';
+            const assigneeLabel = task.assignee ? `👤 ${task.assignee}` : '';
             
             div.innerHTML = `
-                <span class="task-category">${getCategoryLabel(task.category)}</span>
-                <h3>${task.title}</h3>
-                <p>${task.description}</p>
+                <div class="task-actions">
+                    <button class="task-btn" onclick="event.stopPropagation(); openEditModal(${task.id}, '${columnId}')" title="Bearbeiten">✏️</button>
+                    <button class="task-btn delete" onclick="event.stopPropagation(); confirmDelete(${task.id}, '${columnId}')" title="Löschen">🗑️</button>
+                </div>
+                <div class="task-header">
+                    <span class="task-icon">${icon}</span>
+                    <div class="task-content">
+                        <span class="task-category">${getCategoryLabel(task.category)}</span>
+                        <h3>${task.title}</h3>
+                        <p>${task.description || ''}</p>
+                    </div>
+                </div>
                 <div class="task-meta">
-                    <span>👤 ${task.assignee}</span>
-                    <span>${priorityIcon} ${task.priority}</span>
+                    ${assigneeLabel ? `<span>${assigneeLabel}</span>` : ''}
                 </div>
             `;
             
             div.addEventListener('dragstart', handleDragStart);
             div.addEventListener('dragend', handleDragEnd);
-            div.addEventListener('click', () => editTask(task.id));
+            div.addEventListener('click', () => openEditModal(task.id, columnId));
             
             return div;
         }
@@ -294,10 +593,11 @@
         }
 
         function handleDragStart(e) {
-            draggedItem = e.target;
+            draggedItem = e.target.closest('.task');
             e.target.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+            e.dataTransfer.setData('text/plain', draggedItem.dataset.id);
+            e.dataTransfer.setData('text/column', draggedItem.dataset.column);
         }
 
         function handleDragEnd(e) {
@@ -324,17 +624,14 @@
             if (!draggedItem) return;
             
             const taskId = parseInt(draggedItem.dataset.id);
+            const sourceColumn = draggedItem.dataset.column;
+            
+            if (sourceColumn === targetColumn) return;
+            
             let task = null;
-            
-            // Find and remove task from current column
-            ['todo', 'inprogress', 'done'].forEach(col => {
-                const idx = tasksData[col].findIndex(t => t.id === taskId);
-                if (idx !== -1) {
-                    task = tasksData[col].splice(idx, 1)[0];
-                }
-            });
-            
-            if (task) {
+            const idx = tasksData[sourceColumn].findIndex(t => t.id === taskId);
+            if (idx !== -1) {
+                task = tasksData[sourceColumn].splice(idx, 1)[0];
                 tasksData[targetColumn].push(task);
                 renderTasks();
                 saveToStorage();
@@ -345,7 +642,7 @@
             const categories = ['haushalt', 'einkauf', 'pflege', 'garten'];
             const titles = {
                 'haushalt': ['Badezimmer reinigen', 'Fenster putzen', 'Böden wischen', 'Staub wischen'],
-                'einkauf': ['Getränke kaufen', 'Haushaltswaren', ' Drogerieartikel', 'Snacks & Süßigkeiten'],
+                'einkauf': ['Getränke kaufen', 'Haushaltswaren', 'Drogerieartikel', 'Snacks & Süßigkeiten'],
                 'pflege': ['Hemden bügeln', 'Bettwäsche wechseln', 'Schuhe putzen', 'Kleidung sortieren'],
                 'garten': ['Blumen gießen', 'Unkraut jäten', 'Terrasse fegen', 'Gartenmöbel reinigen']
             };
@@ -358,30 +655,106 @@
                 id: Date.now(),
                 category: category,
                 title: title,
-                description: 'Klicken zum Bearbeiten',
-                assignee: ['Max', 'Anna', 'Tom'][Math.floor(Math.random() * 3)],
-                priority: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)]
+                description: '',
+                assignee: '',
+                icon: ICONS[Math.floor(Math.random() * ICONS.length)]
             };
             
             tasksData[columnId].push(newTask);
             renderTasks();
             saveToStorage();
+            
+            // Open edit modal for the new task
+            openEditModal(newTask.id, columnId);
         }
 
-        function editTask(taskId) {
-            const task = ['todo', 'inprogress', 'done']
-                .flatMap(col => tasksData[col].map(t => ({...t, column: col})))
-                .find(t => t.id === taskId);
-            
+        function openEditModal(taskId, columnId) {
+            const task = tasksData[columnId].find(t => t.id === taskId);
             if (!task) return;
             
-            const newTitle = prompt('Neuer Titel:', task.title);
-            if (newTitle && newTitle.trim()) {
-                task.title = newTitle.trim();
-                renderTasks();
-                saveToStorage();
+            document.getElementById('editTaskId').value = taskId;
+            document.getElementById('editColumn').value = columnId;
+            document.getElementById('editTitle').value = task.title;
+            document.getElementById('editDescription').value = task.description || '';
+            document.getElementById('editAssignee').value = task.assignee || '';
+            document.getElementById('editCategory').value = task.category;
+            
+            // Set icon
+            if (task.icon) {
+                const iconRadio = document.querySelector(`input[name="taskIcon"][value="${task.icon}"]`);
+                if (iconRadio) iconRadio.checked = true;
+            } else {
+                document.querySelector('input[name="taskIcon"]').checked = true;
+            }
+            
+            document.getElementById('editModal').classList.add('active');
+            document.getElementById('editTitle').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function deleteCurrentTask() {
+            const taskId = parseInt(document.getElementById('editTaskId').value);
+            const columnId = document.getElementById('editColumn').value;
+            
+            if (confirm('Möchtest du diese Aufgabe wirklich löschen?')) {
+                const idx = tasksData[columnId].findIndex(t => t.id === taskId);
+                if (idx !== -1) {
+                    tasksData[columnId].splice(idx, 1);
+                    renderTasks();
+                    saveToStorage();
+                    closeModal();
+                }
             }
         }
+
+        function confirmDelete(taskId, columnId) {
+            if (confirm('Möchtest du diese Aufgabe wirklich löschen?')) {
+                const idx = tasksData[columnId].findIndex(t => t.id === taskId);
+                if (idx !== -1) {
+                    tasksData[columnId].splice(idx, 1);
+                    renderTasks();
+                    saveToStorage();
+                }
+            }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const taskId = parseInt(document.getElementById('editTaskId').value);
+            const columnId = document.getElementById('editColumn').value;
+            const selectedIcon = document.querySelector('input[name="taskIcon"]:checked');
+            
+            const task = tasksData[columnId].find(t => t.id === taskId);
+            if (task) {
+                task.title = document.getElementById('editTitle').value.trim();
+                task.description = document.getElementById('editDescription').value.trim();
+                task.assignee = document.getElementById('editAssignee').value;
+                task.category = document.getElementById('editCategory').value;
+                task.icon = selectedIcon ? selectedIcon.value : '📋';
+                
+                renderTasks();
+                saveToStorage();
+                closeModal();
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
 
         function saveToStorage() {
             try {
