@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kanban Board</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root {
   --bg-primary: #f8f9fb;
@@ -450,6 +451,24 @@ body {
 
 /* Member Editor */
 .member-list { display: flex; flex-direction: column; gap: 8px; }
+
+.member-emoji {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-column);
+  cursor: pointer;
+  font-size: 18px;
+}
+.member-avatar {
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .member-item {
   display: flex;
   align-items: center;
@@ -693,13 +712,18 @@ body {
 // ===== DATA & STATE =====
 const ICONS = ['📋','💼','💻','🚗','🚲','🛩️','⛺','🧗','🏕️','🚤','🏍️','✈️','🎒','🏠','🔧','⚽','🎮','📷','🎵','🎬','📱','⌚','💡','🔥'];
 const COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+const MEMBER_EMOJIS = [
+  '👨‍💼', '👩‍💻', '👨‍🍳', '👩‍⚕️', '👨‍🔧', '👩‍🎨', '👨‍🏫', '👩‍🚀', 
+  '👨‍🌾', '👩‍🍳', '👨‍🔬', '👩‍🎓', '👨‍💻', '👩‍💼', '👨‍🎤', '👩‍🏋️',
+  '👨‍👩‍👧', '👩‍👧‍👦', '🧑‍🤝‍🧑', '👫', '👬', '👭', '🧑‍🧑‍🧒', '👨‍👨‍👦‍👦'
+];
 const DEFAULT_MEMBERS = [
-  { id: 'm1', name: 'Max', color: '#3b82f6' },
-  { id: 'm2', name: 'Anna', color: '#10b981' },
-  { id: 'm3', name: 'Tom', color: '#f59e0b' },
-  { id: 'm4', name: 'Lisa', color: '#ef4444' },
-  { id: 'm5', name: 'Familie', color: '#8b5cf6' },
-  { id: 'm6', name: 'Gemeinsam', color: '#ec4899' }
+  { id: 'm1', name: 'Max', emoji: '👨‍💼', color: '#3b82f6' },
+  { id: 'm2', name: 'Anna', emoji: '👩‍💻', color: '#10b981' },
+  { id: 'm3', name: 'Tom', emoji: '👨‍🍳', color: '#f59e0b' },
+  { id: 'm4', name: 'Lisa', emoji: '👩‍⚕️', color: '#ef4444' },
+  { id: 'm5', name: 'Familie', emoji: '👨‍👩‍👧', color: '#8b5cf6' },
+  { id: 'm6', name: 'Gemeinsam', emoji: '🧑‍🤝‍🧑', color: '#ec4899' }
 ];
 const COLUMNS = ['todo', 'progress', 'done'];
 
@@ -774,8 +798,11 @@ function renderMemberList() {
   const list = document.getElementById('memberList');
   list.innerHTML = state.members.map(m => `
     <div class="member-item" data-id="${m.id}">
+      <select class="member-emoji" data-id="${m.id}">
+        ${MEMBER_EMOJIS.map(e => `<option value="${e}" ${m.emoji === e ? 'selected' : ''}>${e}</option>`).join('')}
+      </select>
       <input type="color" class="member-color" value="${m.color}" data-id="${m.id}">
-      <span class="member-name">${m.name}</span>
+      <input type="text" class="member-name" value="${m.name}" data-id="${m.id}">
       <button class="member-delete" data-id="${m.id}">×</button>
     </div>
   `).join('');
@@ -785,6 +812,20 @@ function renderMemberList() {
       const id = e.target.dataset.id;
       const member = state.members.find(m => m.id === id);
       if (member) { member.color = e.target.value; saveState(); renderBoard(); }
+    });
+  });
+  list.querySelectorAll('.member-emoji').forEach(el => {
+    el.addEventListener('change', e => {
+      const id = e.target.dataset.id;
+      const member = state.members.find(m => m.id === id);
+      if (member) { member.emoji = e.target.value; saveState(); renderBoard(); }
+    });
+  });
+  list.querySelectorAll('.member-name').forEach(el => {
+    el.addEventListener('input', e => {
+      const id = e.target.dataset.id;
+      const member = state.members.find(m => m.id === id);
+      if (member) { member.name = e.target.value; saveState(); }
     });
   });
 
@@ -918,7 +959,7 @@ function renderTaskCard(task) {
   const dueBadge = task.dueDate ? `<span class="due-badge ${dueInfo.status}">${dueInfo.status === 'overdue' ? '⚠️' : dueInfo.status === 'today' ? '📅' : '📅'} ${dueInfo.label}</span>` : '';
   const memberBadge = member ? `
     <span class="member-badge" style="background:${member.color}22;color:${member.color}">
-      <span class="member-dot" style="background:${member.color}"></span>
+      <span class="member-avatar">${member.emoji || "👤"}</span>
       ${member.name}
     </span>
   ` : '';
